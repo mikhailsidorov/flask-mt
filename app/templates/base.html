@@ -1,7 +1,3 @@
-
-</html>
-
-<!doctype html>
 <html lang="en">
     <head>
         <!-- Required meta tags -->
@@ -23,6 +19,7 @@
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
                     <a class="nav-item nav-link" href="{{ url_for('index') }}">Home</a>
+                    <a class="nav-item nav-link" href="{{ url_for('explore') }}">Explore</a>
                     {% if current_user.is_anonymous %}
                     <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
                     {% else %}
