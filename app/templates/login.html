@@ -1,35 +1,17 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
-{% block content %}
+{% block app_content %}
     <h1>Sign In</h1>
-    <form action="" method="post">
-        {{ form.hidden_tag() }}
-        <p class="form-group">
-            {{ form.username.label }}<br>
-            {% if form.username.errors %}
-            {{ form.username(size=32, class="form-control is-invalid") }}
-            {% for error in form.username.errors %}
-            <span class="invalid-feedback">[{{ error }}]</span>
-            {% endfor %}
-            {% else %}
-            {{ form.username(size=32, class="form-control") }}
-            {% endif %}
-        </p>
-        <p class="form-group">
-            {{ form.password.label }}
-            {% if form.password.errors %}
-            {{ form.password(size=32, class="form-control is-invalid") }}
-            {% for error in form.password.errors %}
-            <span class="invalid-feedback">[{{ error }}]</span>
-            {% endfor %}
-            {% else %}
-            {{ form.password(size=32, class="form-control") }}
-            {% endif %}
-        </p>
-        <p class="form-check">{{ form.remember_me(class="form-check-input") }} {{ form.remember_me.label(class="form-check-label") }}</p>
-        <p>{{ form.submit(class="btn btn-primary") }}</p>
-        
-    </form>
-    <p>New User? <a class="btn btn-success" href="{{ url_for('register') }}">Click to Register!</a></p>
-    <p>Forgot Your Password? <a href="{{ url_for('reset_password_request') }}" class="btn btn-secondary">Click to Reset It</a></p>
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(form) }}
+        </div>
+    </div>
+    <br>
+    <p>New User? <a href="{{ url_for("register") }}">Click to Register</a></p>
+    <p>
+        Forgot Your Password?
+        <a href="{{ url_for('reset_password_request') }}">Click to Reset It</a>
+    </p>
 {% endblock %}
