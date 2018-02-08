@@ -1,0 +1,250 @@
+# Spanish translations for PROJECT.
+# Copyright (C) 2018 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2018-02-08 14:09+1200\n"
+"PO-Revision-Date: 2018-02-08 12:33+1200\n"
+"Last-Translator: \n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.3\n"
+
+#: app/__init__.py:21
+msgid "Please log in to access this page."
+msgstr "Por favor ingrese para acceder a esta página."
+
+#: app/email.py:22
+msgid "[Microblog] Reset Your Password"
+msgstr "[Microblog] Nueva Contraseña"
+
+#: app/forms.py:9 app/forms.py:16 app/forms.py:34
+msgid "Username"
+msgstr "Nombre de usuario"
+
+#: app/forms.py:10 app/forms.py:18 app/forms.py:60
+msgid "Password"
+msgstr "Contraseña"
+
+#: app/forms.py:11
+msgid "Remember Me"
+msgstr "Recordarme"
+
+#: app/forms.py:12 app/routes.py:53 app/templates/login.html:5
+msgid "Sign In"
+msgstr "Ingresar"
+
+#: app/forms.py:17 app/forms.py:55
+msgid "Email"
+msgstr "Email"
+
+#: app/forms.py:19 app/forms.py:61
+msgid "Repeat Password"
+msgstr "Repetir Contraseña"
+
+#: app/forms.py:20 app/routes.py:74 app/templates/register.html:5
+msgid "Register"
+msgstr "Register"
+
+#: app/forms.py:25 app/forms.py:46
+msgid "Please use a different username."
+msgstr "Por favor use un nombre de usuario diferente."
+
+#: app/forms.py:30
+msgid "Please use a different email address."
+msgstr "Por favor use una dirección de email diferente."
+
+#: app/forms.py:35
+msgid "About me"
+msgstr "Acerca de mí"
+
+#: app/forms.py:36 app/forms.py:51
+msgid "Submit"
+msgstr "Enviar"
+
+#: app/forms.py:50
+msgid "Say something"
+msgstr "Dí algo"
+
+#: app/forms.py:56 app/forms.py:62
+msgid "Request Password Reset"
+msgstr "Pedir una nueva contraseña"
+
+#: app/routes.py:29
+msgid "Your post is now live!"
+msgstr "¡Tu artículo ha sido publicado!"
+
+#: app/routes.py:35 app/templates/base.html:15
+msgid "Home"
+msgstr "Inicio"
+
+#: app/routes.py:46
+msgid "Invalid username or password"
+msgstr "Nombre de usuario o contraseña inválidos"
+
+#: app/routes.py:72
+msgid "Congratulations, you are now a registered user!"
+msgstr "¡Felicitaciones, ya eres un usuario registrado!"
+
+#: app/routes.py:96
+msgid "Your changes have been saved."
+msgstr "Tus cambios han sido salvados."
+
+#: app/routes.py:101 app/templates/edit_profile.html:5
+msgid "Edit Profile"
+msgstr "Editar Perfil"
+
+#: app/routes.py:109
+#, python-format
+msgid "User %(username)s not found."
+msgstr "El usuario %(username)s no ha sido encontrado."
+
+#: app/routes.py:112
+msgid "You cannot follow yourself!"
+msgstr "¡No te puedes seguir a tí mismo!"
+
+#: app/routes.py:116
+#, python-format
+msgid "You are following %(username)s!"
+msgstr "¡Ahora estás siguiendo a %(username)s!"
+
+#: app/routes.py:125
+msgid "User %(username) not found"
+msgstr ""
+
+#: app/routes.py:128
+msgid "you cannot unfollow yourself!"
+msgstr "¡No te puedes dejar de seguir a tí mismo!"
+
+#: app/routes.py:132
+#, python-format
+msgid "You are not following %(username)s."
+msgstr "No estás siguiendo a %(username)s."
+
+#: app/routes.py:143 app/templates/base.html:16
+msgid "Explore"
+msgstr "Explorar"
+
+#: app/routes.py:155
+msgid "Check your email for the instructions to reset your password"
+msgstr "Busca en tu email las instrucciones para crear una nueva contraseña"
+
+#: app/routes.py:157 app/templates/reset_password_request.html:5
+msgid "Reset Password"
+msgstr "Nueva Contraseña"
+
+#: app/routes.py:171
+msgid "Your password has been reset."
+msgstr "Tu contraseña ha sido cambiada."
+
+#: app/templates/404.html:4
+msgid "File Not Found"
+msgstr "Página No Encontrada"
+
+#: app/templates/500.html:4
+msgid "An unexpected error has occurred"
+msgstr "Ha ocurrido un error inesperado"
+
+#: app/templates/500.html:5
+msgid "The administrator has been notified. Sorry for the inconvenience!"
+msgstr "El administrador ha sido notificado. ¡Lamentamos la inconveniencia!"
+
+#: app/templates/500.html:6
+msgid "Back"
+msgstr "Atrás"
+
+#: app/templates/_post.html:16
+#, python-format
+msgid "%(username)s said %(when)s"
+msgstr "%(username)s dijo %(when)s"
+
+#: app/templates/base.html:4
+msgid "Welcome to Microblog"
+msgstr "Bienvenido a Microblog"
+
+#: app/templates/base.html:20
+msgid "Login"
+msgstr "Ingresar"
+
+#: app/templates/base.html:22
+msgid "Profile"
+msgstr "Perfil"
+
+#: app/templates/base.html:23
+msgid "Logout"
+msgstr "Salir"
+
+#: app/templates/index.html:5
+#, python-format
+msgid "Hi, %(username)s!"
+msgstr "¡Hola, %(username)s!"
+
+#: app/templates/index.html:17
+msgid "Newer posts"
+msgstr "Artículos siguientes"
+
+#: app/templates/index.html:22
+msgid "Older posts"
+msgstr "Artículos previos"
+
+#: app/templates/login.html:12
+msgid "New User?"
+msgstr "¿Usuario Nuevo?"
+
+#: app/templates/login.html:12
+msgid "Click to Register"
+msgstr "¡Haz click aquí para registrarte!"
+
+#: app/templates/login.html:14
+msgid "Forgot Your Password?"
+msgstr "¿Te olvidaste tu contraseña?"
+
+#: app/templates/login.html:15
+msgid "Click to Reset It"
+msgstr "Haz click aquí para pedir una nueva"
+
+#: app/templates/reset_password.html:5
+msgid "Reset Your Password"
+msgstr "Nueva Contraseña"
+
+#: app/templates/user.html:8
+msgid "User"
+msgstr "Usuario"
+
+#: app/templates/user.html:10
+msgid "Last seen on"
+msgstr "Última visita"
+
+#: app/templates/user.html:11
+#, python-format
+msgid "%(count)d folowers"
+msgstr "%(count)d seguidores"
+
+#: app/templates/user.html:11
+#, python-format
+msgid "%(count)d following"
+msgstr "siguiendo a %(count)d"
+
+#: app/templates/user.html:13
+msgid "Edit your profile"
+msgstr "Editar tu perfil"
+
+#: app/templates/user.html:15
+msgid "Follow"
+msgstr "Seguir"
+
+#: app/templates/user.html:17
+msgid "Unfollow"
+msgstr "Dejar de seguir"
+
+#~ msgid "User %(username)s not found"
+#~ msgstr ""
+
