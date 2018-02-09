@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-02-08 14:09+1200\n"
+"POT-Creation-Date: 2018-02-09 11:57+1200\n"
 "PO-Revision-Date: 2018-02-08 12:33+1200\n"
 "Last-Translator: \n"
 "Language: es\n"
@@ -38,7 +38,7 @@ msgstr "Contraseña"
 msgid "Remember Me"
 msgstr "Recordarme"
 
-#: app/forms.py:12 app/routes.py:53 app/templates/login.html:5
+#: app/forms.py:12 app/routes.py:58 app/templates/login.html:5
 msgid "Sign In"
 msgstr "Ingresar"
 
@@ -50,7 +50,7 @@ msgstr "Email"
 msgid "Repeat Password"
 msgstr "Repetir Contraseña"
 
-#: app/forms.py:20 app/routes.py:74 app/templates/register.html:5
+#: app/forms.py:20 app/routes.py:79 app/templates/register.html:5
 msgid "Register"
 msgstr "Register"
 
@@ -78,72 +78,76 @@ msgstr "Dí algo"
 msgid "Request Password Reset"
 msgstr "Pedir una nueva contraseña"
 
-#: app/routes.py:29
+#: app/routes.py:34
 msgid "Your post is now live!"
 msgstr "¡Tu artículo ha sido publicado!"
 
-#: app/routes.py:35 app/templates/base.html:15
+#: app/routes.py:40 app/templates/base.html:15
 msgid "Home"
 msgstr "Inicio"
 
-#: app/routes.py:46
+#: app/routes.py:51
 msgid "Invalid username or password"
 msgstr "Nombre de usuario o contraseña inválidos"
 
-#: app/routes.py:72
+#: app/routes.py:77
 msgid "Congratulations, you are now a registered user!"
 msgstr "¡Felicitaciones, ya eres un usuario registrado!"
 
-#: app/routes.py:96
+#: app/routes.py:101
 msgid "Your changes have been saved."
 msgstr "Tus cambios han sido salvados."
 
-#: app/routes.py:101 app/templates/edit_profile.html:5
+#: app/routes.py:106 app/templates/edit_profile.html:5
 msgid "Edit Profile"
 msgstr "Editar Perfil"
 
-#: app/routes.py:109
+#: app/routes.py:114 app/routes.py:130
 #, python-format
 msgid "User %(username)s not found."
 msgstr "El usuario %(username)s no ha sido encontrado."
 
-#: app/routes.py:112
+#: app/routes.py:117
 msgid "You cannot follow yourself!"
 msgstr "¡No te puedes seguir a tí mismo!"
 
-#: app/routes.py:116
+#: app/routes.py:121
 #, python-format
 msgid "You are following %(username)s!"
 msgstr "¡Ahora estás siguiendo a %(username)s!"
 
-#: app/routes.py:125
-msgid "User %(username) not found"
-msgstr ""
-
-#: app/routes.py:128
+#: app/routes.py:133
 msgid "you cannot unfollow yourself!"
 msgstr "¡No te puedes dejar de seguir a tí mismo!"
 
-#: app/routes.py:132
+#: app/routes.py:137
 #, python-format
 msgid "You are not following %(username)s."
 msgstr "No estás siguiendo a %(username)s."
 
-#: app/routes.py:143 app/templates/base.html:16
+#: app/routes.py:148 app/templates/base.html:16
 msgid "Explore"
 msgstr "Explorar"
 
-#: app/routes.py:155
+#: app/routes.py:160
 msgid "Check your email for the instructions to reset your password"
 msgstr "Busca en tu email las instrucciones para crear una nueva contraseña"
 
-#: app/routes.py:157 app/templates/reset_password_request.html:5
+#: app/routes.py:162 app/templates/reset_password_request.html:5
 msgid "Reset Password"
 msgstr "Nueva Contraseña"
 
-#: app/routes.py:171
+#: app/routes.py:176
 msgid "Your password has been reset."
 msgstr "Tu contraseña ha sido cambiada."
+
+#: app/translate.py:9
+msgid "Error: the translation service not configured."
+msgstr ""
+
+#: app/translate.py:15
+msgid "Error: the translation service failed."
+msgstr ""
 
 #: app/templates/404.html:4
 msgid "File Not Found"
@@ -161,10 +165,14 @@ msgstr "El administrador ha sido notificado. ¡Lamentamos la inconveniencia!"
 msgid "Back"
 msgstr "Atrás"
 
-#: app/templates/_post.html:16
+#: app/templates/_post.html:14
 #, python-format
 msgid "%(username)s said %(when)s"
 msgstr "%(username)s dijo %(when)s"
+
+#: app/templates/_post.html:24
+msgid "Translate"
+msgstr ""
 
 #: app/templates/base.html:4
 msgid "Welcome to Microblog"
@@ -181,6 +189,10 @@ msgstr "Perfil"
 #: app/templates/base.html:23
 msgid "Logout"
 msgstr "Salir"
+
+#: app/templates/base.html:58
+msgid "Error: Could not contact server."
+msgstr ""
 
 #: app/templates/index.html:5
 #, python-format
@@ -246,5 +258,8 @@ msgid "Unfollow"
 msgstr "Dejar de seguir"
 
 #~ msgid "User %(username)s not found"
+#~ msgstr ""
+
+#~ msgid "User %(username) not found"
 #~ msgstr ""
 
