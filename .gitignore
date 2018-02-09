@@ -103,4 +103,4 @@ ENV/
 /app/app.db
 /logs/
 /.idea/
-/.DS_Store
+*.DS_Store
