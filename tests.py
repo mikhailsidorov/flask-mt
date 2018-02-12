@@ -86,7 +86,6 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(f3, [p3, p4])
         self.assertEqual(f4, [p4])
 
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
-
-
