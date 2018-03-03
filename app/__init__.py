@@ -2,6 +2,8 @@ import logging
 import os
 from logging.handlers import SMTPHandler, RotatingFileHandler
 
+import rq
+from redis import Redis
 from elasticsearch import Elasticsearch
 from flask import Flask, request, current_app
 from flask_babel import Babel, lazy_gettext as _l
@@ -38,6 +40,8 @@ def create_app(config_class=Config):
     bootstrap.init_app(app)
     moment.init_app(app)
     babel.init_app(app)
+    app.redis = Redis.from_url(app.config['REDIS_URL'])
+    app.task_queue = rq.Queue('microblog-tasks', connection=app.redis)
 
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
