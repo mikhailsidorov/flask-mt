@@ -10,7 +10,14 @@
                 {% if user.last_seen %}<p>{{ _('Last seen on') }}: {{ moment(user.last_seen).format('LLL') }}</p>{% endif %}
                 <p>{{ _('%(count)d folowers', count=user.followers.count()) }}, {{ _('%(count)d following', count=user.followed.count()) }}</p>
                 {% if user == current_user %}
-                <p><a class="btn btn-primary" href="{{ url_for('main.edit_profile') }}">{{ _('Edit your profile') }}</a></p>
+                <p>
+                    <a class="btn btn-primary" href="{{ url_for('main.edit_profile') }}">{{ _('Edit your profile') }}</a>
+                </p>
+                {% if not current_user.get_task_in_progress('export_posts') %}
+                <p>
+                    <a class="btn btn-primary" href="{{ url_for('main.export_posts') }}">{{ _('Export your posts') }}</a>
+                </p>
+                {% endif %}
                 {% elif not current_user.is_following(user) %}
                 <p><a class="btn btn-primary" href="{{ url_for('main.follow', username=user.username) }}">{{ _('Follow') }}</a></p>
                 {% else %}
