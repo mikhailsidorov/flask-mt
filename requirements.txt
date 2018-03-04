@@ -10,6 +10,7 @@ elasticsearch==6.1.1
 Flask==0.12.2
 Flask-Babel==0.11.2
 Flask-Bootstrap==3.3.7.1
+Flask-HTTPAuth==3.2.3
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
 Flask-Migrate==2.1.1
@@ -28,6 +29,7 @@ MarkupSafe==1.0
 mccabe==0.6.1
 psycopg2==2.7.4
 psycopg2-binary==2.7.4
+Pygments==2.2.0
 PyJWT==1.5.3
 pylint==1.8.2
 python-dateutil==2.6.1
