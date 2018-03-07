@@ -1,6 +1,105 @@
-version: '2.2'
+version: '3'
 services:
+  
+  app:
+    container_name: "app"
+    restart: always
+    build: ./app/
+    expose:
+      - "8000"
+    links:
+      - postgres:postgres
+      - redis:redis
+      - elasticsearch:elasticsearch
+    env_file: 
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://${DB_USER}:${DB_PASS}@${DB_SERVICE}:5432/${DB_NAME}
+    volumes:
+      - ./app:/data/app
+    working_dir: /data/app
+    command: ["sh", "./wait-for-postgres.sh", "postgres", "gunicorn", "microblog:app", "-w", "2", "-b", ":8000"]
+    depends_on:
+      - app-migration
+      - app-translation
+      - postgres
+      - rq-worker
+      - elasticsearch
+      - redis
+    
+  app-migration:
+    container_name: "app-migration"
+    restart: on-failure
+    build: ./app/
+    links:
+      - postgres:postgres
+    env_file: 
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://${DB_USER}:${DB_PASS}@${DB_SERVICE}:5432/${DB_NAME}
+    volumes:
+      - ./app:/data/app
+    working_dir: /data/app
+    command: flask db upgrade
+    depends_on:
+      - postgres
+
+  app-translation:
+    container_name: "app-translation"
+    restart: on-failure
+    build: ./app/
+    env_file:
+      - .env
+    volumes:
+      - ./app:/data/app
+    working_dir: /data/app
+    command: flask translate compile
+
+  rq-worker:
+    container_name: "rq-worker"
+    restart: always
+    build: ./app/
+    links:
+      - redis:redis
+      - postgres:postgres
+      - elasticsearch:elasticsearch
+    env_file: 
+      - .env
+    volumes:
+      - ./app:/data/app
+    command: rq worker microblog-tasks -u ${REDIS_URL}
+    depends_on:
+      - redis
+      - elasticsearch
+      - postgres
+
+  nginx:
+    container_name: "nginx"
+    restart: always
+    build: ./nginx/
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/data/app
+    links:
+      - app:app
+    depends_on:
+      - app
+      - postgres
+      - app-migration
+
+  postgres:
+    container_name: "postgres"
+    restart: always
+    image: postgres:latest
+    volumes:
+      - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - db:/var/lib/postgresql
+    env_file:
+      - .env
+
   elasticsearch:
+    container_name: "elasticsearch"
     image: docker.elastic.co/elasticsearch/elasticsearch:6.2.1
     container_name: elasticsearch
     environment:
@@ -15,7 +114,9 @@ services:
       - elasticsearch:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
+
   redis:
+    container_name: "redis"
     restart: always
     image: redis:latest
     ports:
@@ -23,4 +124,5 @@ services:
 
 volumes:
   elasticsearch:
-    driver: local
+  db:
+
