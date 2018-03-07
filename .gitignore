@@ -101,6 +101,6 @@ ENV/
 .mypy_cache/
 /.vscode/
 *app.db
-/logs/
+*logs/
 /.idea/
 *.DS_Store
