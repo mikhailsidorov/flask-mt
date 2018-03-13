@@ -6,7 +6,7 @@ services:
     restart: always
     build: ./app/
     ports:
-      - "3000:3000"
+      - "4444:4444"
     expose:
       - "8000"
     links:
@@ -64,6 +64,8 @@ services:
     container_name: "rq-worker"
     restart: always
     build: ./app/
+    ports:
+      - "4445:4445"
     links:
       - redis:redis
       - postgres:postgres
@@ -130,4 +132,3 @@ services:
 volumes:
   elasticsearch:
   db:
-
