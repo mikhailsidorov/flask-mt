@@ -13,6 +13,7 @@ services:
       - postgres:postgres
       - redis:redis
       - elasticsearch:elasticsearch
+      - smtp:smtp
     env_file: 
       - .env
     environment:
@@ -70,10 +71,12 @@ services:
       - redis:redis
       - postgres:postgres
       - elasticsearch:elasticsearch
+      - smtp:smtp
     env_file: 
       - .env
     environment:
       - DATABASE_URL=postgresql+psycopg2://${DB_USER}:${DB_PASS}@${DB_SERVICE}:5432/${DB_NAME}
+      - FLASK_DEBUG=0
     volumes:
       - ./app:/data/app
     command: rq worker microblog-tasks -u ${REDIS_URL}
@@ -130,6 +133,13 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
+
+  smtp:
+    container_name: "mail"
+    image: python:3.6
+    expose:
+      - "25"
+    command: python -m smtpd -n -c DebuggingServer 0.0.0.0:25
 
 volumes:
   elasticsearch:
