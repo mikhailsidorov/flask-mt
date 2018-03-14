@@ -72,6 +72,8 @@ services:
       - elasticsearch:elasticsearch
     env_file: 
       - .env
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://${DB_USER}:${DB_PASS}@${DB_SERVICE}:5432/${DB_NAME}
     volumes:
       - ./app:/data/app
     command: rq worker microblog-tasks -u ${REDIS_URL}
