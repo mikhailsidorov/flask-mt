@@ -135,7 +135,7 @@ services:
       - 6379:6379
 
   smtp:
-    container_name: "mail"
+    container_name: "smtp"
     image: python:3.6
     expose:
       - "25"
