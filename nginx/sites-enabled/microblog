@@ -5,8 +5,8 @@ server {
     server_name microblog.example.com;
     charset utf-8;
 
-    location /static {
-        alias /data/app/app/static;
+    location /static/ {
+        alias /data/app/app/static/;
     }
 
     location / {
