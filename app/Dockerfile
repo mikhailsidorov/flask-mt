@@ -8,7 +8,7 @@ RUN apk update \
     && apk upgrade \
     && apk add --update python3 python3-dev postgresql-client postgresql-dev build-base gettext \
     && pip3 install --upgrade pip \
-    && pip3 install -r requirements.txt \
+    && pip3 install -r requirements/prod.txt \
     && apk del -r python3-dev postgresql
 
 COPY . /data/app/

@@ -1,8 +1,11 @@
 language: python
 python:
   - "3.6"
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libenchant-dev
 install:
-  - pip install -r app/requirements.txt
+  - pip install -r app/requirements/test.txt
 services:
   - postgresql
 before_script:
