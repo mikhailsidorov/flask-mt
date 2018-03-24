@@ -13,6 +13,7 @@ from flask_mail import Mail
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 
 from config import Config
 
@@ -32,6 +33,8 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
         if app.config['ELASTICSEARCH_URL'] else None
+
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -100,4 +103,3 @@ def create_app(config_class=Config):
 @babel.localeselector
 def get_locale():
     return request.accept_languages.best_match(current_app.config['LANGUAGES'])
-
