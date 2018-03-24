@@ -1,10 +1,10 @@
-from flask import jsonify, request, url_for
+from flask import g, jsonify, request, url_for
 
 from app import db
 from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import bad_request
-from app.models import User
+from app.models import User, Post
 
 
 @bp.route('/users/<int:id>', methods=['GET'])
@@ -73,3 +73,41 @@ def update_user(id):
     user.from_dict(data, new_user=False)
     db.session.commit()
     return jsonify(user.to_dict())
+
+
+@bp.route('/users/<int:id>/posts', methods=['GET'])
+@token_auth.login_required
+def get_user_posts(id):
+    user = User.query.get_or_404(id)
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+    posts_query = Post.query.filter_by(user_id=id)
+    data = User.to_collection_dict(posts_query, page, per_page, 'api.get_user_posts')
+    return jsonify(data)
+
+
+@bp.route('/users/<int:id>/posts', methods=['POST'])
+@token_auth.login_required
+def create_post(id):
+    user = User.query.get_or_404(id)
+    if user != g.current_user:
+        return '', 404
+    data = request.get_json() or {}
+    if 'body' not in data or 'user_id' not in data:
+        return bad_request('must include post_body and user_id fields')
+    if User.query.filter_by(id=data['user_id']).first() != g.current_user:
+        return '', 404
+    post = Post()
+    post.from_dict(data)
+    db.session.add(post)
+    db.session.commit()
+    response = jsonify(post.to_dict())
+    response.status_code = 201
+    response.headers['Location'] = url_for('api.get_user_post', id=user.id)
+    return response 
+
+
+@bp.route('/users/<int:user_id>/posts/<int:post_id>', methods=['GET'])
+@token_auth.login_required
+def get_user_post(user_id, post_id):
+    return jsonify(Post.query.get_or_404(post_id).to_dict())
