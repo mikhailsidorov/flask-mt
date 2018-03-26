@@ -1,6 +1,10 @@
 language: python
 python:
   - "3.6"
+env:
+  global:
+    - ENV_TYPE='TESTING'
+    - DATABASE_URL_TEST='postgresql+psycopg2://postgres:@localhost:5432/flaskmt_test'
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libenchant-dev
@@ -9,6 +13,6 @@ install:
 services:
   - postgresql
 before_script:
-  - psql -c 'create database travis_ci_test;' -U postgres
+  - psql -c 'create database flaskmt_test;' -U postgres
 script:
   - python app/tests.py
