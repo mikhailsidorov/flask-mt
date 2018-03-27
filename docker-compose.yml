@@ -21,7 +21,7 @@ services:
     volumes:
       - ./app:/data/app
     working_dir: /data/app
-    command: ["sh", "./wait-for-postgres.sh", "postgres", "gunicorn", "microblog:app", "-w", "1", "-b", ":8000"]
+    command: ["sh", "./wait-for-postgres.sh", "postgres", "gunicorn", "microblog:app", "-w", "2", "-b", ":8000"]
     depends_on:
       - app-migration
       - app-translation
@@ -40,7 +40,6 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgresql+psycopg2://${DB_USER}:${DB_PASS}@${DB_SERVICE}:5432/${DB_NAME}
-      - FLASK_DEBUG=0
     volumes:
       - ./app:/data/app
     working_dir: /data/app
@@ -54,8 +53,6 @@ services:
     build: ./app/
     env_file:
       - .env
-    environment:
-      - FLASK_DEBUG=0
     volumes:
       - ./app:/data/app
     working_dir: /data/app
