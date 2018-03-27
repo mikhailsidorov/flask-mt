@@ -2,7 +2,7 @@ FROM alpine
 
 RUN mkdir -p /data/app
 WORKDIR /data/app
-COPY requirements.txt /data/app/
+COPY requirements /data/app/requirements
 
 RUN apk update \
     && apk upgrade \
