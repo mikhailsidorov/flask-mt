@@ -58,6 +58,24 @@ services:
     working_dir: /data/app
     command: flask translate compile
 
+  app-testing:
+    container_name: "app-testing"
+    restart: always
+    build: ./app/
+    links:
+      - postgres:postgres
+    env_file: 
+      - .env
+    environment:
+      - ENV_TYPE=TESTING
+      - DATABASE_URL_TESTING=postgresql+psycopg2://${DB_USER_TESTING}:${DB_PASS_TESTING}@${DB_SERVICE_TESTING}:5432/${DB_NAME_TESING}
+    volumes:
+      - ./app:/data/app
+    working_dir: /data/app
+    command: tail -f /dev/null
+    depends_on:
+      - postgres
+
   rq-worker:
     container_name: "rq-worker"
     restart: always

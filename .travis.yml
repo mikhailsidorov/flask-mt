@@ -4,7 +4,7 @@ python:
 env:
   global:
     - ENV_TYPE='TESTING'
-    - DATABASE_URL_TEST='postgresql+psycopg2://postgres:@localhost:5432/flaskmt_test'
+    - DATABASE_URL_TESTING='postgresql+psycopg2://postgres:@localhost:5432/flaskmt_test'
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libenchant-dev
