@@ -68,7 +68,7 @@ services:
       - .env
     environment:
       - ENV_TYPE=TESTING
-      - DATABASE_URL_TESTING=postgresql+psycopg2://${DB_USER_TESTING}:${DB_PASS_TESTING}@${DB_SERVICE_TESTING}:5432/${DB_NAME_TESING}
+      - DATABASE_URL_TESTING=postgresql+psycopg2://${DB_USER_TESTING}:${DB_PASS_TESTING}@${DB_SERVICE_TESTING}:5432/${DB_NAME_TESTING}
     volumes:
       - ./app:/data/app
     working_dir: /data/app
