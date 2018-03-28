@@ -1,6 +1,10 @@
+import json
 import unittest
-from datetime import datetime, timedelta
+from base64 import b64encode
+from datetime import datetime, date, timedelta
 
+
+import app
 from app import create_app, db
 from app.models import User, Post
 from config import Config
@@ -75,12 +79,72 @@ class UserModelCase(unittest.TestCase):
         f2 = u2.followed_posts().all()
         f3 = u3.followed_posts().all()
         f4 = u4.followed_posts().all()
-   
+
         self.assertEqual(f1, [p2, p4, p1])
         self.assertEqual(f2, [p2, p3])
         self.assertEqual(f3, [p3, p4])
         self.assertEqual(f4, [p4])
 
+
+class APITestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app(Config)
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
+
+        self.client = self.app.test_client()
+
+        self.user = User(username='john', email='john@example.com') 
+        self.test_password = 'test_password'
+        self.user.set_password(self.test_password)
+        self.token = self.user.get_token()
+
+        self.basic_auth_headers = {
+            'Authorization': 'Basic ' + b64encode(bytes("{0}:{1}".format(
+                self.user.username,
+                self.test_password),
+                'ascii')).decode('ascii')
+        }
+        self.token_auth_headers = {
+            'Authorization': 'Bearer ' + self.token
+        }
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+
+    def test_get_token(self):
+        response = self.client.post(
+            '/api/tokens', headers=self.basic_auth_headers)
+        data = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['token'], self.token)
+        self.assertEqual(data['user_id'], self.user.id)
+        expiration_date = datetime.strptime(
+            data['token_expiration'], '%a, %d %b %Y %X %Z')
+        self.assertGreater(expiration_date, datetime.now())
+
+    def test_get_token_auth_required(self):
+        response = self.client.post('/api/tokens')
+        self.assertEqual(response.status_code, 401)
+        response = self.client.post(
+            '/api/tokens', headers=self.basic_auth_headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_revoke_token(self):
+        response = self.client.delete(
+            '/api/tokens', headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 204)
+        print(response.data)
+
+    def test_revoke_token_auth_required(self):
+        response = self.client.delete('/api/tokens')
+        self.assertEqual(response.status_code, 401)
+        response = self.client.delete(
+            '/api/tokens', headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 204)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
