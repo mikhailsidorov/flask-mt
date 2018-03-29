@@ -3,8 +3,6 @@ import unittest
 from base64 import b64encode
 from datetime import datetime, date, timedelta
 
-
-import app
 from app import create_app, db
 from app.models import User, Post
 from config import Config
