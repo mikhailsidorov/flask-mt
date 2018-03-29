@@ -10,9 +10,13 @@ before_install:
   - sudo apt-get install -y libenchant-dev
 install:
   - pip install -r app/requirements/test.txt
+  - pip install python-coveralls
+  - pip install coverage
 services:
   - postgresql
 before_script:
   - psql -c 'create database flaskmt_test;' -U postgres
 script:
-  - python app/tests.py
+  - coverage run --source app app/tests.py
+after_success:
+  - coveralls
