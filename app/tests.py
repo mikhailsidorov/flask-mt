@@ -3,6 +3,8 @@ import unittest
 from base64 import b64encode
 from datetime import datetime, date, timedelta
 
+from flask import jsonify, url_for
+
 from app import create_app, db
 from app.models import User, Post
 from config import Config
@@ -87,17 +89,25 @@ class UserModelCase(unittest.TestCase):
 class APITestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(Config)
-        self.app_context = self.app.app_context()
+        self.app_context = self.app.test_request_context()
         self.app_context.push()
         db.create_all()
 
         self.client = self.app.test_client()
 
-        self.user = User(username='john', email='john@example.com') 
+        self.user = User(username='john', email='john@example.com')
+        self.user2 = User(username='Siri', email='siri@example.com')
+        db.session.add(self.user, self.user2)
+        
+        
         self.test_password = 'test_password'
         self.user.set_password(self.test_password)
+        db.session.commit()
         self.token = self.user.get_token()
 
+        self.user2.set_password(self.test_password)
+        self.token2 = self.user2.get_token()
+        
         self.basic_auth_headers = {
             'Authorization': 'Basic ' + b64encode(bytes("{0}:{1}".format(
                 self.user.username,
@@ -143,6 +153,114 @@ class APITestCase(unittest.TestCase):
         response = self.client.delete(
             '/api/tokens', headers=self.token_auth_headers)
         self.assertEqual(response.status_code, 204)
+
+    def test_get_user(self):
+        response = self.client.get(
+            url_for('api.get_user', id=self.user.id),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        data1 = {
+                'id': self.user.id,
+                'username': self.user.username,
+                'last_seen': self.user.last_seen.isoformat() + 'Z',
+                'about_me': self.user.about_me,
+                'post_count': self.user.posts.count(),
+                'follower_count': self.user.followers.count(),
+                'followed_count': self.user.followed.count(),
+                '_links': {
+                    'self': url_for('api.get_user', id=self.user.id),
+                    'followers': url_for('api.get_followers', id=self.user.id),
+                    'followed': url_for('api.get_followed', id=self.user.id),
+                    'avatar': self.user.avatar(128)
+                }
+            }
+        self.assertEqual(data, data1)
+
+    def test_get_user_token_auth_required(self):
+        response = self.client.get(
+            url_for('api.get_user', id=self.user.id))
+        self.assertEqual(response.status_code, 401)
+        response = self.client.get(
+            url_for('api.get_user', id=self.user.id),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_user_does_not_exists(self):
+        response = self.client.get(
+            url_for('api.get_user', id=100),
+            headers=self.token_auth_headers
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_users(self):
+        response = self.client.get(
+            url_for('api.get_users'),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        data1 = User.to_collection_dict(User.query, 1, 10, 'api.get_users')
+        self.assertEqual(data, data1)
+        self.assertEqual(data['_meta']['total_items'], 2)
+        self.assertIn(self.user.to_dict(), data['items'])
+        self.assertIn(self.user2.to_dict(), data['items'])
+
+    def test_get_users_token_auth_required(self):
+        response = self.client.get(
+            url_for('api.get_users'), headers={})
+        self.assertEqual(response.status_code, 401)
+        response = self.client.get(
+            url_for('api.get_users'),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_followers(self):
+        # self.maxDiff = None
+        response = self.client.get(
+            url_for('api.get_followers', id=self.user.id),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        data1 = User.to_collection_dict(self.user.followers, 1, 10, 'api.get_followers', id=self.user.id)
+        self.assertEqual(data, data1)
+
+    def test_get_followers_user_does_not_exists(self):
+        response = self.client.get(
+            url_for('api.get_followers', id=100),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_followers_token_auth_required(self):
+        response = self.client.get(
+            url_for('api.get_followers', id=self.user.id),
+            headers={})
+        self.assertEqual(response.status_code, 401)
+        response = self.client.get(
+            url_for('api.get_followers', id=self.user.id),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_followed(self):
+        response = self.client.get(
+            url_for('api.get_followed', id=self.user.id),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        data1 = User.to_collection_dict(self.user.followed, 1, 10, 'api.get_followed', id=self.user.id)
+        self.assertEqual(data, data1)
+
+    def test_get_followed_user_does_not_exist(self):
+        response = self.client.get(
+            url_for('api.get_followed', id=100),
+            headers=self.token_auth_headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_followed_token_auth_required(self):
+        response = self.client.get(
+            url_for('api.get_followed', id=self.user.id),
+            headers={})
+        self.assertEqual(response.status_code, 401)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
