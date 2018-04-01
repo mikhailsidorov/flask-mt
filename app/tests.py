@@ -92,14 +92,11 @@ class APITestCase(unittest.TestCase):
         self.app_context = self.app.test_request_context()
         self.app_context.push()
         db.create_all()
-
         self.client = self.app.test_client()
 
         self.user = User(username='john', email='john@example.com')
         self.user2 = User(username='Siri', email='siri@example.com')
         db.session.add(self.user, self.user2)
-        
-        
         self.test_password = 'test_password'
         self.user.set_password(self.test_password)
         db.session.commit()
@@ -112,11 +109,17 @@ class APITestCase(unittest.TestCase):
             'Authorization': 'Basic ' + b64encode(bytes("{0}:{1}".format(
                 self.user.username,
                 self.test_password),
-                'ascii')).decode('ascii')
-        }
+                'ascii')).decode('ascii')}
         self.token_auth_headers = {
-            'Authorization': 'Bearer ' + self.token
-        }
+            'Authorization': 'Bearer ' + self.token}
+        self.user_data = {
+            'username': 'user100', 
+            'password': self.test_password,
+            'email': 'user100@example.com'}
+        self.updated_user_data = {
+            'username': 'user100',
+            'email': 'user100@example.com',
+            'about_me': 'blabla'}
 
     def tearDown(self):
         db.session.remove()
@@ -260,6 +263,66 @@ class APITestCase(unittest.TestCase):
             url_for('api.get_followed', id=self.user.id),
             headers={})
         self.assertEqual(response.status_code, 401)
+
+    def test_create_user(self):
+        response = self.client.post(
+            url_for('api.create_user'),
+            data=json.dumps(self.user_data),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        new_user = User.query.filter_by(
+            username=self.user_data['username']).first()
+        self.assertEqual(
+            response.headers['Location'],
+            url_for('api.get_user', id=new_user.id, _external=True))
+        data = json.loads(response.data)
+        self.assertEqual(data['username'], self.user_data['username'])
+        self.assertEqual(data['id'], new_user.id)
+        self.assertTrue(new_user.check_password(self.user_data['password']))
+        self.assertEqual(new_user.email, self.user_data['email'])
+
+    def test_create_user_error_on_incomplete_data(self):
+        user_data = self.user_data.copy()
+        user_data.pop('email', None)
+        error_text = 'must include username, email and password fields'
+        response = self.client.post(
+            url_for('api.create_user'), data=json.dumps(user_data))
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(error_text, str(response.data))
+
+        user_data = self.user_data.copy()
+        user_data.pop('password', None)
+        response = self.client.post(
+            url_for('api.create_user'), data=json.dumps(user_data),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(error_text, str(response.data))
+
+        user_data = self.user_data.copy()
+        user_data.pop('username', None)
+        response = self.client.post(
+            url_for('api.create_user'), data=json.dumps(user_data),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(error_text, str(response.data))
+
+    def test_create_user_error_on_username_already_used(self):
+        self.user_data['username'] = self.user.username
+        error_text = 'please use a different username'
+        response = self.client.post(
+            url_for('api.create_user'), data=json.dumps(self.user_data),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(error_text, str(response.data))
+
+    def test_create_user_error_on_email_already_used(self):
+        self.user_data['email'] = self.user.email
+        error_text = 'please use a different email address'
+        response = self.client.post(
+            url_for('api.create_user'), data=json.dumps(self.user_data),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(error_text, str(response.data))
 
 
 if __name__ == '__main__':
