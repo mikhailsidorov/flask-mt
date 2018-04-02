@@ -253,7 +253,8 @@ class Post(PaginatedAPIMixin, SearchableMixin, db.Model):
             'user_id': self.user_id,
             'language': self.language,
             '_links': {
-                'self': url_for('api.get_post', id=self.id),
+                'self': url_for('api.get_user_post',
+                                user_id=self.user_id, post_id=self.id),
                 'author': url_for('api.get_user', id=self.user_id),
             }
         }
