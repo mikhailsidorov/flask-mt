@@ -48,3 +48,4 @@ wrapt==1.10.11
 WTForms==2.1
 rpdb
 flask-cors
+flask-allows==0.4
