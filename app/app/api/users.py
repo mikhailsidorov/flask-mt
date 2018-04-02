@@ -5,6 +5,7 @@ from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import bad_request
 from app.models import User, Post
+from app.authr import allows, CanUpdateProfile
 
 
 @bp.route('/users/<int:id>', methods=['GET'])
@@ -63,12 +64,15 @@ def create_user():
 
 @bp.route('/users/<int:id>', methods=['PUT'])
 @token_auth.login_required
+@allows.requires(CanUpdateProfile())
 def update_user(id):
     user = User.query.get_or_404(id)
     data = request.get_json() or {}
-    if 'username' in data and data['username'] != user.username and User.query.filter_by(username=data['username']).first():
+    if 'username' in data and data['username'] != user.username and \
+            User.query.filter_by(username=data['username']).first():
         return bad_request('please use a different username')
-    if 'email' in data and data['email'] != user.email and User.query.filter_by(email=data['email']).first():
+    if 'email' in data and data['email'] != user.email and \
+            User.query.filter_by(email=data['email']).first():
         return bad_request('please use a different email address')
     user.from_dict(data, new_user=False)
     db.session.commit()
