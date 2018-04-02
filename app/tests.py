@@ -94,6 +94,7 @@ class APITestCase(unittest.TestCase):
         db.create_all()
         self.client = self.app.test_client()
 
+    
         self.user1 = User(username='john', email='john@example.com')
         self.user2 = User(username='Siri', email='siri@example.com')
         self.test_password = 'test_password'
@@ -101,7 +102,7 @@ class APITestCase(unittest.TestCase):
         self.user1_token = self.user1.get_token()
         self.user2.set_password(self.test_password)
         self.user2_token = self.user2.get_token()
-        db.session.add(self.user1, self.user2)
+        db.session.add_all([self.user1, self.user2])
         db.session.commit()
         self.basic_auth_headers = {
             'Authorization': 'Basic ' + b64encode(bytes("{0}:{1}".format(
@@ -118,9 +119,14 @@ class APITestCase(unittest.TestCase):
             'username': 'user100',
             'email': 'user100@example.com',
             'about_me': 'blabla'}
+        post1 = Post(body='test post 1', author=self.user1, language='en')
+        post2 = Post(body='test post 2', author=self.user1, language='en')
+        db.session.add_all([post1, post2])
+        db.session.commit()
 
     def tearDown(self):
-        db.session.remove()
+        db.session.close()
+        # db.session.remove()
         db.drop_all()
         self.app_context.pop()
 
@@ -394,6 +400,35 @@ class APITestCase(unittest.TestCase):
             headers=self.user1_token_auth_headers,
             data=json.dumps(self.updated_user_data),
             content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_user_posts(self):
+        response = self.client.get(
+            url_for('api.get_user_posts', id=self.user1.id),
+            headers=self.user1_token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        posts_query = Post.query.filter_by(user_id=self.user1.id)
+        data1 = User.to_collection_dict(
+            posts_query, 1, 10, 'api.get_user_posts', id=self.user1.id)
+        self.assertEqual(data, data1)
+        self.assertEqual(data['_meta']['total_items'], 2)
+        for post in self.user1.posts.all():
+            self.assertIn(post.to_dict(), data['items'])
+
+    def test_get_user_posts_error_on_user_does_not_exist(self):
+        response = self.client.get(
+            url_for('api.get_user_posts', id=1000),
+            headers=self.user1_token_auth_headers)
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_user_posts_token_auth_required(self):
+        response = self.client.get(
+            url_for('api.get_user_posts', id=self.user1.id))
+        self.assertEqual(response.status_code, 401)
+        response  = self.client.get(
+            url_for('api.get_user_posts', id=self.user1.id),
+            headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
 
 

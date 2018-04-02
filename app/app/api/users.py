@@ -86,7 +86,7 @@ def get_user_posts(id):
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     posts_query = Post.query.filter_by(user_id=id)
-    data = User.to_collection_dict(posts_query, page, per_page, 'api.get_user_posts')
+    data = User.to_collection_dict(posts_query, page, per_page, 'api.get_user_posts', id=id)
     return jsonify(data)
 
 
