@@ -1,6 +1,5 @@
 [run]
 branch = True
-source = flask-mt/app
 
 [report]
 exclude_lines =
