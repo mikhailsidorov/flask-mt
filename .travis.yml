@@ -19,7 +19,7 @@ services:
 before_script:
   - psql -c 'create database flaskmt_test;' -U postgres
 script:
-  - coverage run --source app app/tests.py
+  - coverage run app/tests.py
 after_success:
   - coveralls
   - codecov
