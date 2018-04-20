@@ -1,3 +1,6 @@
+[run]
+source = app
+
 [report]
 exclude_lines =
     if self.debug:
