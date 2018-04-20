@@ -1,7 +1,16 @@
+[run]
+branch = True
+source = flask-mt
+
 [report]
-omit =
-    *__init__*
-    app/config/*
 exclude_lines =
+    if self.debug:
+    pragma: no cover
+    raise NotImplementedError
     def __repr__
     if __name__ == .__main__.:
+ignore_errors = True
+omit =
+    tests/*
+    *__init__*
+    app/config/*
