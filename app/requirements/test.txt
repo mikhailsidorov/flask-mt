@@ -1,2 +1,3 @@
 -r base.txt
 pyenchant==2.0.0
+codecov
