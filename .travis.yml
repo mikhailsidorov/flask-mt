@@ -13,6 +13,7 @@ install:
   - pip install -r app/requirements/test.txt
   - pip install python-coveralls
   - pip install coverage
+  - pip install codecov
 services:
   - postgresql
 before_script:
@@ -21,3 +22,4 @@ script:
   - coverage run --source app app/tests.py
 after_success:
   - coveralls
+  - codecov
