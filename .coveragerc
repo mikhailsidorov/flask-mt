@@ -12,5 +12,6 @@ ignore_errors = True
 omit =
     tests/*
     app/tests.py
+    app/tests/*
     *__init__*
     app/config/*
