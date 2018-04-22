@@ -3,7 +3,7 @@ import unittest
 from base64 import b64encode
 from datetime import datetime, date, timedelta
 
-from flask import url_for
+from flask import jsonify, url_for
 
 from app import create_app, db
 from app.models import User, Post
@@ -12,13 +12,12 @@ from config import Config
 
 class APITestCase(unittest.TestCase):
     def setUp(self):
+        self.maxDiff = None
         self.app = create_app(Config)
         self.app_context = self.app.test_request_context()
         self.app_context.push()
         db.create_all()
         self.client = self.app.test_client()
-
-
         self.user1 = User(username='john', email='john@example.com')
         self.user2 = User(username='Siri', email='siri@example.com')
         self.test_password = 'test_password'
@@ -43,6 +42,14 @@ class APITestCase(unittest.TestCase):
             'username': 'user100',
             'email': 'user100@example.com',
             'about_me': 'blabla'}
+        self.post_data1 = {
+            'body': 'Test message',
+            'user_id': self.user1.id,
+            'language': 'en-EN'}
+        self.post_data100 = {
+            'body': 'Test message',
+            'user_id': 100,
+            'language': 'en-EN'}
         post1 = Post(body='test post 1', author=self.user1, language='en')
         post2 = Post(body='test post 2', author=self.user1, language='en')
         db.session.add_all([post1, post2])
@@ -50,7 +57,6 @@ class APITestCase(unittest.TestCase):
 
     def tearDown(self):
         db.session.close()
-        # db.session.remove()
         db.drop_all()
         self.app_context.pop()
 
@@ -90,21 +96,7 @@ class APITestCase(unittest.TestCase):
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
-        data1 = {
-                'id': self.user1.id,
-                'username': self.user1.username,
-                'last_seen': self.user1.last_seen.isoformat() + 'Z',
-                'about_me': self.user1.about_me,
-                'post_count': self.user1.posts.count(),
-                'follower_count': self.user1.followers.count(),
-                'followed_count': self.user1.followed.count(),
-                '_links': {
-                    'self': url_for('api.get_user', id=self.user1.id),
-                    'followers': url_for('api.get_followers', id=self.user1.id),
-                    'followed': url_for('api.get_followed', id=self.user1.id),
-                    'avatar': self.user1.avatar(128)
-                }
-            }
+        data1 = User.query.get(self.user1.id).to_dict()
         self.assertEqual(data, data1)
 
     def test_get_user_token_auth_required(self):
@@ -145,7 +137,6 @@ class APITestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_followers(self):
-        # self.maxDiff = None
         response = self.client.get(
             url_for('api.get_followers', id=self.user1.id),
             headers=self.user1_token_auth_headers)
@@ -350,7 +341,54 @@ class APITestCase(unittest.TestCase):
         response = self.client.get(
             url_for('api.get_user_posts', id=self.user1.id))
         self.assertEqual(response.status_code, 401)
-        response  = self.client.get(
+        response = self.client.get(
             url_for('api.get_user_posts', id=self.user1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
+
+    def test_create_user_post(self):
+        response = self.client.post(
+            url_for('api.get_user_posts', id=self.user1.id),
+            data=json.dumps(self.post_data1),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        data1 = json.loads(response.data)
+        data2 = Post.query.get(data1['id']).to_dict()
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(data1, data2)
+        self.assertEqual(
+            response.headers['Location'],
+            url_for('api.get_user_post', user_id=self.user1.id,
+                    post_id=data1['id'], _external=True))
+
+    def test_create_user_post_error_on_empty_data_request(self):
+        response = self.client.post(
+            url_for('api.get_user_posts', id=self.user1.id),
+            data=json.dumps({}),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('must include user_id field', str(response.data))
+        response = self.client.post(
+            url_for('api.get_user_posts', id=self.user1.id),
+            data=json.dumps({'user_id':self.user1.id}),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('must include post_body field', str(response.data))
+
+    def test_create_user_post_error_on_not_own_post_creation(self):
+        response = self.client.post(
+            url_for('api.get_user_posts', id=self.user2.id),
+            data=json.dumps(self.post_data1),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+
+    def test_create_user_post_error_on_not_equal_user_id_in_post_data(self):
+        response = self.client.post(
+            url_for('api.get_user_posts', id=self.user1.id),
+            data=json.dumps(self.post_data100),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 403)
