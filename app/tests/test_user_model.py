@@ -12,7 +12,7 @@ from config import Config
 class UserModelCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(Config)
-        self.app_context = self.app.app_context()
+        self.app_context = self.app.test_request_context()
         self.app_context.push()
         db.create_all()
 
@@ -83,3 +83,25 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(f2, [p2, p3])
         self.assertEqual(f3, [p3, p4])
         self.assertEqual(f4, [p4])
+
+    def test_(self):
+        self.user1 = User(username='john', email='john@example.com')
+        db.session.add(self.user1)
+        db.session.commit()
+        data = {
+            'id': self.user1.id,
+            'username': self.user1.username,
+            'last_seen': self.user1.last_seen.isoformat() + 'Z',
+            'about_me': self.user1.about_me,
+            'post_count': self.user1.posts.count(),
+            'follower_count': self.user1.followers.count(),
+            'followed_count': self.user1.followed.count(),
+            '_links': {
+                'self': url_for('api.get_user', id=self.user1.id),
+                'followers': url_for('api.get_followers', id=self.user1.id),
+                'followed': url_for('api.get_followed', id=self.user1.id),
+                'avatar': self.user1.avatar(128)
+            }
+        }
+        data1 = User.query.get_or_404(self.user1.id).to_dict()
+        self.assertEqual(data, data1)
