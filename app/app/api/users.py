@@ -5,7 +5,7 @@ from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import bad_request
 from app.models import User, Post
-from app.authr import allows, CanUpdateProfile
+from app.authr import allows, CanCreatePost, CanUpdateProfile
 
 
 @bp.route('/users/<int:id>', methods=['GET'])
@@ -92,23 +92,21 @@ def get_user_posts(id):
 
 @bp.route('/users/<int:id>/posts', methods=['POST'])
 @token_auth.login_required
+@allows.requires(CanCreatePost())
 def create_post(id):
     user = User.query.get_or_404(id)
-    if user != g.current_user:
-        return '', 404
     data = request.get_json() or {}
     if 'body' not in data or 'user_id' not in data:
-        return bad_request('must include post_body and user_id fields')
-    if User.query.filter_by(id=data['user_id']).first() != g.current_user:
-        return '', 404
+        return bad_request('must include post_body field')
     post = Post()
     post.from_dict(data)
     db.session.add(post)
     db.session.commit()
     response = jsonify(post.to_dict())
     response.status_code = 201
-    response.headers['Location'] = url_for('api.get_user_post', id=user.id)
-    return response 
+    response.headers['Location'] = url_for(
+        'api.get_user_post', user_id=user.id, post_id=post.id)
+    return response
 
 
 @bp.route('/users/<int:user_id>/posts/<int:post_id>', methods=['GET'])
