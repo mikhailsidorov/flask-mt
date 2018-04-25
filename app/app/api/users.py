@@ -1,11 +1,11 @@
-from flask import g, jsonify, request, url_for
+from flask import jsonify, make_response, request, url_for
 
 from app import db
 from app.api import bp
 from app.api.auth import token_auth
 from app.api.errors import bad_request
 from app.models import User, Post
-from app.authr import allows, CanCreatePost, CanUpdateProfile
+from app.authr import allows, CanCreatePost, CanUpdateProfile, CanDeleteProfile
 
 
 @bp.route('/users/<int:id>', methods=['GET'])
@@ -113,3 +113,13 @@ def create_post(id):
 @token_auth.login_required
 def get_user_post(user_id, post_id):
     return jsonify(Post.query.get_or_404(post_id).to_dict())
+
+
+@bp.route('/users/<int:id>/', methods=['DELETE'])
+@token_auth.login_required
+@allows.requires(CanDeleteProfile())
+def delete_user(id):
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    return ('', 200)

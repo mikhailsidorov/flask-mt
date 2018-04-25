@@ -21,10 +21,15 @@ class UserAPITestCase(unittest.TestCase):
         self.test_password = 'test_password'
         self.user1.set_password(self.test_password)
         self.user1_token = self.user1.get_token()
+        self.user2.set_password(self.test_password)
+        self.user2_token = self.user2.get_token()
         db.session.add_all([self.user1, self.user2])
         db.session.commit()
         self.user1_token_auth_headers = {
             'Authorization': 'Bearer ' + self.user1_token}
+        self.user2_token_auth_headers = {
+            'Authorization': 'Bearer ' + self.user2_token}
+        
         self.user_data = {'username': 'user100',
                           'password': self.test_password,
                           'email': 'user100@example.com'}
@@ -204,3 +209,24 @@ class UserAPITestCase(unittest.TestCase):
             data=json.dumps(self.updated_user_data),
             content_type='application/json')
         self.assertEqual(response.status_code, 200)
+
+    def test_delete_user(self):
+        response = self.client.delete(
+            url_for('api.delete_user', id=self.user1.id),
+            headers=self.user1_token_auth_headers)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            url_for('api.get_user', id=self.user1.id),
+            headers=self.user2_token_auth_headers)
+        self.assertEqual(response.status_code, 404)
+
+    def tets_delete_error_on_not_self_deletion(self):
+        response = self.client.delete(
+            url_for('api.delete_user', id=self.user2.id),
+            headers=self.user1_token_auth_headers)
+        self.assertEqual(response.status_code, 401)
+
+    def test_delete_user_token_auth_required(self):
+        response = self.client.delete(
+            url_for('api.delete_user', id=self.user1.id))
+        self.assertEqual(response.status_code, 401)
