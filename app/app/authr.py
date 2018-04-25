@@ -1,7 +1,6 @@
 from flask_allows import Allows, Requirement
 from flask import abort, g
 
-from .api.errors import bad_request
 
 allows = Allows(identity_loader=lambda: g.current_user)
 
@@ -10,13 +9,16 @@ class UserRequirementMixin(object):
     def is_profile_owner(self, identity, request):
         return identity.id == request.view_args['id']
 
-
-class CanUpdateProfile(UserRequirementMixin, Requirement):
     def fulfill(self, identity, request):
         return self.is_profile_owner(identity, request)
 
-    def is_profile_owner(self, identity, request):
-        return identity.id == request.view_args['id']
+
+class CanUpdateProfile(UserRequirementMixin, Requirement):
+    pass
+
+
+class CanDeleteProfile(UserRequirementMixin, Requirement):
+    pass
 
 
 class CanCreatePost(UserRequirementMixin, Requirement):
