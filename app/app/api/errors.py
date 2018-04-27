@@ -13,3 +13,7 @@ def error_response(status_code, message=None):
 
 def bad_request(message):
     return error_response(400, message)
+
+
+def invalid_post_data():
+    return bad_request('must include username, email and password fields')

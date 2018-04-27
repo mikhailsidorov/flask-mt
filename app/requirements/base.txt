@@ -49,3 +49,4 @@ WTForms==2.1
 rpdb
 flask-cors
 flask-allows==0.4
+Flask-RESTful==0.3.6

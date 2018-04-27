@@ -1,8 +1,7 @@
-
 import unittest
 from datetime import datetime, timedelta
 
-from flask import url_for
+from flask_restful import url_for
 
 from app import create_app, db
 from app.models import User, Post
@@ -79,9 +78,11 @@ class UserModelCase(unittest.TestCase):
             'follower_count': self.user1.followers.count(),
             'followed_count': self.user1.followed.count(),
             '_links': {
-                'self': url_for('api.get_user', id=self.user1.id),
-                'followers': url_for('api.get_followers', id=self.user1.id),
-                'followed': url_for('api.get_followed', id=self.user1.id),
+                'self': url_for('api.user_detail', user_id=self.user1.id),
+                'followers': url_for('api.follower_list',
+                                     user_id=self.user1.id),
+                'followed': url_for('api.followed_list',
+                                    user_id=self.user1.id),
                 'avatar': self.user1.avatar(128)
             }
         }

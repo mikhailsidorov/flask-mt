@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from flask import url_for
+from flask_restful import url_for
 
 from app import create_app, db
 from app.models import User, Post
@@ -49,13 +49,13 @@ class PostAPITestCase(unittest.TestCase):
 
     def test_get_user_posts(self):
         response = self.client.get(
-            url_for('api.get_user_posts', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         posts_query = Post.query.filter_by(user_id=self.user1.id)
         data1 = User.to_collection_dict(
-            posts_query, 1, 10, 'api.get_user_posts', id=self.user1.id)
+            posts_query, 1, 10, 'api.post_list', user_id=self.user1.id)
         self.assertEqual(data, data1)
         self.assertEqual(data['_meta']['total_items'], 2)
         for post in self.user1.posts.all():
@@ -63,22 +63,22 @@ class PostAPITestCase(unittest.TestCase):
 
     def test_get_user_posts_error_on_user_does_not_exist(self):
         response = self.client.get(
-            url_for('api.get_user_posts', id=1000),
+            url_for('api.post_list', user_id=1000),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 404)
 
     def test_get_user_posts_token_auth_required(self):
         response = self.client.get(
-            url_for('api.get_user_posts', id=self.user1.id))
+            url_for('api.post_list', user_id=self.user1.id))
         self.assertEqual(response.status_code, 401)
         response = self.client.get(
-            url_for('api.get_user_posts', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
 
     def test_create_user_post(self):
         response = self.client.post(
-            url_for('api.create_post', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             data=json.dumps(self.post_data1),
             headers=self.user1_token_auth_headers,
             content_type='application/json')
@@ -88,21 +88,21 @@ class PostAPITestCase(unittest.TestCase):
         self.assertEqual(data1, data2)
         self.assertEqual(
             response.headers['Location'],
-            url_for('api.get_user_post',
+            url_for('api.post_detail',
                     user_id=self.user1.id,
                     post_id=data1['id'],
                     _external=True))
 
     def test_create_user_post_error_on_empty_data_request(self):
         response = self.client.post(
-            url_for('api.create_post', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             data=json.dumps({}),
             headers=self.user1_token_auth_headers,
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
         self.assertIn('must include user_id field', str(response.data))
         response = self.client.post(
-            url_for('api.create_post', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             data=json.dumps({'user_id': self.user1.id}),
             headers=self.user1_token_auth_headers,
             content_type='application/json')
@@ -111,13 +111,13 @@ class PostAPITestCase(unittest.TestCase):
 
     def test_create_user_post_error_on_not_own_post_creation(self):
         response = self.client.post(
-            url_for('api.create_post', id=self.user2.id),
+            url_for('api.post_list', user_id=self.user2.id),
             data=json.dumps(self.post_data2),
             headers=self.user1_token_auth_headers,
             content_type='application/json')
         self.assertEqual(response.status_code, 403)
         response = self.client.post(
-            url_for('api.create_post', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             data=json.dumps(self.post_data1),
             headers=self.user1_token_auth_headers,
             content_type='application/json')
@@ -125,13 +125,13 @@ class PostAPITestCase(unittest.TestCase):
 
     def test_create_user_post_error_on_not_equal_user_id_in_post_data(self):
         response = self.client.post(
-            url_for('api.create_post', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             data=json.dumps(self.post_data2),
             headers=self.user1_token_auth_headers,
             content_type='application/json')
         self.assertEqual(response.status_code, 403)
         response = self.client.post(
-            url_for('api.create_post', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             data=json.dumps(self.post_data1),
             headers=self.user1_token_auth_headers,
             content_type='application/json')
@@ -139,16 +139,16 @@ class PostAPITestCase(unittest.TestCase):
 
     def test_create_user_post_token_auth_required(self):
         response = self.client.get(
-            url_for('api.create_post', id=self.user1.id))
+            url_for('api.post_list', user_id=self.user1.id))
         self.assertEqual(response.status_code, 401)
         response = self.client.get(
-            url_for('api.create_post', id=self.user1.id),
+            url_for('api.post_list', user_id=self.user1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
 
     def test_get_user_post_get_own_post(self):
         response = self.client.get(
-            url_for('api.get_user_post', user_id=self.user1.id,
+            url_for('api.post_detail', user_id=self.user1.id,
                     post_id=self.post1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
@@ -156,7 +156,7 @@ class PostAPITestCase(unittest.TestCase):
 
     def test_get_user_post_get_not_own_post(self):
         response = self.client.get(
-            url_for('api.get_user_post', user_id=self.user2.id,
+            url_for('api.post_detail', user_id=self.user2.id,
                     post_id=self.post2.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
@@ -164,11 +164,11 @@ class PostAPITestCase(unittest.TestCase):
 
     def test_get_user_post_token_auth_required(self):
         response = self.client.get(
-            url_for('api.get_user_post', user_id=self.user1.id,
+            url_for('api.post_detail', user_id=self.user1.id,
                     post_id=self.post1.id))
         self.assertEqual(response.status_code, 401)
         response = self.client.get(
-            url_for('api.get_user_post', user_id=self.user1.id,
+            url_for('api.post_detail', user_id=self.user1.id,
                     post_id=self.post1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)

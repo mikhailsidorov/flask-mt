@@ -33,47 +33,48 @@ class UserAPITestCase(unittest.TestCase):
 
     def test_get_followers(self):
         response = self.client.get(
-            url_for('api.get_followers', id=self.user1.id),
+            url_for('api.follower_list', user_id=self.user1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         data1 = User.to_collection_dict(
-            self.user1.followers, 1, 10, 'api.get_followers',
-            id=self.user1.id)
+            self.user1.followers, 1, 10, 'api.follower_list',
+            user_id=self.user1.id)
         self.assertEqual(data, data1)
 
     def test_get_followers_user_does_not_exists(self):
         response = self.client.get(
-            url_for('api.get_followers', id=100),
+            url_for('api.follower_list', user_id=100),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 404)
 
     def test_get_followers_token_auth_required(self):
         response = self.client.get(
-            url_for('api.get_followers', id=self.user1.id))
+            url_for('api.follower_list', user_id=self.user1.id))
         self.assertEqual(response.status_code, 401)
         response = self.client.get(
-            url_for('api.get_followers', id=self.user1.id),
+            url_for('api.follower_list', user_id=self.user1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
 
     def test_get_followed(self):
         response = self.client.get(
-            url_for('api.get_followed', id=self.user1.id),
+            url_for('api.followed_list', user_id=self.user1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         data1 = User.to_collection_dict(
-            self.user1.followed, 1, 10, 'api.get_followed', id=self.user1.id)
+            self.user1.followed, 1, 10, 'api.followed_list',
+            user_id=self.user1.id)
         self.assertEqual(data, data1)
 
     def test_get_followed_user_does_not_exist(self):
         response = self.client.get(
-            url_for('api.get_followed', id=100),
+            url_for('api.followed_list', user_id=100),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 404)
 
     def test_get_followed_token_auth_required(self):
         response = self.client.get(
-            url_for('api.get_followed', id=self.user1.id))
+            url_for('api.followed_list', user_id=self.user1.id))
         self.assertEqual(response.status_code, 401)
