@@ -8,7 +8,7 @@ from time import time
 import jwt
 import redis
 import rq
-from flask import current_app, url_for
+from flask_restful import current_app, url_for
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -41,12 +41,16 @@ class PaginatedAPIMixin(object):
                 'total_items': resources.total
             },
             '_links': {
-                'self': url_for(endpoint, page=page, per_page=per_page, **kwargs),
-                'next': url_for(endpoint, page=page + 1, per_page=per_page, **kwargs) if resources.has_next else None,
-                'prev': url_for(endpoint, page=page -1, per_page=per_page, **kwargs) if resources.has_prev else None
+                'self': url_for(endpoint, page=page, per_page=per_page,
+                                **kwargs),
+                'next': url_for(endpoint, page=page + 1, per_page=per_page,
+                                **kwargs) if resources.has_next else None,
+                'prev': url_for(endpoint, page=page - 1, per_page=per_page,
+                                **kwargs) if resources.has_prev else None
             }
         }
         return data
+
 
 class SearchableMixin(object):
     @classmethod
@@ -57,7 +61,8 @@ class SearchableMixin(object):
         when = []
         for i in range(len(ids)):
             when.append((ids[i], i))
-        return cls.query.filter(cls.id.in_(ids)).order_by(db.case(when, value=cls.id)), total
+        return cls.query.filter(cls.id.in_(ids)).order_by(
+            db.case(when, value=cls.id)), total
 
     @classmethod
     def before_commit(cls, session):
@@ -91,7 +96,8 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-    notifications = db.relationship('Notification', backref='user', lazy='dynamic')
+    notifications = db.relationship('Notification', backref='user',
+                                    lazy='dynamic')
     followed = db.relationship(
         'User', secondary=followers,
         primaryjoin=(followers.c.follower_id == id),
@@ -111,7 +117,7 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
     tasks = db.relationship('Task', backref='user', lazy='dynamic')
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
-    
+
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -135,7 +141,8 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
+            digest, size)
 
     def follow(self, user):
         if not self.is_following(user):
@@ -146,11 +153,12 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             self.followed.remove(user)
 
     def is_following(self, user):
-        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
-    
+        return self.followed.filter(
+            followers.c.followed_id == user.id).count() > 0
+
     def followed_posts(self):
         followed = Post.query.join(
-            followers, 
+            followers,
             (followers.c.followed_id == Post.user_id)). \
             filter(followers.c.follower_id == self.id)
         own = Post.query.filter_by(user_id=self.id)
@@ -174,8 +182,10 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         return n
 
     def launch_task(self, name, description, *args, **kwargs):
-        rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id, *args, **kwargs)
-        task = Task(id=rq_job.get_id(), name=name, description=description, user=self)
+        rq_job = current_app.task_queue.enqueue(
+            'app.tasks.' + name, self.id, *args, **kwargs)
+        task = Task(id=rq_job.get_id(), name=name, description=description,
+                    user=self)
         db.session.add(task)
         return task
 
@@ -183,7 +193,8 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
         return Task.query.filter_by(user=self, complete=False).all()
 
     def get_task_in_progress(self, name):
-        return Task.query.filter_by(name=name, user=self, complete=False).first()
+        return Task.query.filter_by(name=name, user=self,
+                                    complete=False).first()
 
     def to_dict(self, include_email=False):
         data = {
@@ -195,9 +206,9 @@ class User(PaginatedAPIMixin, UserMixin, db.Model):
             'follower_count': self.followers.count(),
             'followed_count': self.followed.count(),
             '_links': {
-                'self': url_for('api.get_user', id=self.id),
-                'followers': url_for('api.get_followers', id=self.id),
-                'followed': url_for('api.get_followed', id=self.id),
+                'self': url_for('api.user_detail', user_id=self.id),
+                'followers': url_for('api.follower_list', user_id=self.id),
+                'followed': url_for('api.followed_list', user_id=self.id),
                 'avatar': self.avatar(128)
             }
         }
@@ -253,9 +264,9 @@ class Post(PaginatedAPIMixin, SearchableMixin, db.Model):
             'user_id': self.user_id,
             'language': self.language,
             '_links': {
-                'self': url_for('api.get_user_post',
+                'self': url_for('api.post_detail',
                                 user_id=self.user_id, post_id=self.id),
-                'author': url_for('api.get_user', id=self.user_id),
+                'author': url_for('api.user_detail', user_id=self.user_id),
             }
         }
         return data
@@ -296,7 +307,7 @@ class Task(db.Model):
         except (redis.exceptions.RedisError, rq.exceptions.NoSuchJobError):
             return None
         return rq_job
-    
+
     def get_progress(self):
         job = self.get_rq_job()
         return job.meta.get('progress', 0) if job is not None else 100

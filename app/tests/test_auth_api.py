@@ -3,6 +3,8 @@ import unittest
 from base64 import b64encode
 from datetime import datetime
 
+from flask_restful import url_for
+
 from app import create_app, db
 from app.models import User
 from config import Config
@@ -37,7 +39,7 @@ class AuthAPITestCase(unittest.TestCase):
 
     def test_get_token(self):
         response = self.client.post(
-            '/api/tokens', headers=self.basic_auth_headers)
+            url_for('api.tokens'), headers=self.basic_auth_headers)
         data = json.loads(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['token'], self.user1_token)
@@ -50,17 +52,17 @@ class AuthAPITestCase(unittest.TestCase):
         response = self.client.post('/api/tokens')
         self.assertEqual(response.status_code, 401)
         response = self.client.post(
-            '/api/tokens', headers=self.basic_auth_headers)
+            url_for('api.tokens'), headers=self.basic_auth_headers)
         self.assertEqual(response.status_code, 200)
 
     def test_revoke_token(self):
         response = self.client.delete(
-            '/api/tokens', headers=self.user1_token_auth_headers)
+            url_for('api.tokens'), headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 204)
 
     def test_revoke_token_auth_required(self):
-        response = self.client.delete('/api/tokens')
+        response = self.client.delete(url_for('api.tokens'))
         self.assertEqual(response.status_code, 401)
         response = self.client.delete(
-            '/api/tokens', headers=self.user1_token_auth_headers)
+            url_for('api.tokens'), headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 204)
