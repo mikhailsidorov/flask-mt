@@ -6,6 +6,7 @@ from flask_restful import url_for
 from app import create_app, db
 from app.models import User
 from config import Config
+from app.api.errors import exceptions
 
 
 class UserAPITestCase(unittest.TestCase):
@@ -100,7 +101,6 @@ class UserAPITestCase(unittest.TestCase):
         self.assertEqual(new_user.email, self.user_data['email'])
 
     def test_create_user_error_on_incomplete_data(self):
-        error_text = 'must include username, email and password fields'
         for key in self.user_data.keys():
             user_data = self.user_data.copy()
             user_data.pop(key, None)
@@ -108,25 +108,26 @@ class UserAPITestCase(unittest.TestCase):
                 url_for('api.user_list'), data=json.dumps(user_data),
                 content_type='application/json')
             self.assertEqual(response.status_code, 400)
-            self.assertIn(error_text, str(response.data))
+            self.assertIn(exceptions.UserRequiredFiesldsIsMissing.description,
+                          str(response.data))
 
     def test_create_user_error_on_username_already_used(self):
         self.user_data['username'] = self.user1.username
-        error_text = 'please use a different username'
         response = self.client.post(
             url_for('api.user_list'), data=json.dumps(self.user_data),
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertIn(error_text, str(response.data))
+        self.assertIn(exceptions.UsernameAlreadyUsed.description,
+                      str(response.data))
 
     def test_create_user_error_on_email_already_used(self):
         self.user_data['email'] = self.user1.email
-        error_text = 'please use a different email address'
         response = self.client.post(
             url_for('api.user_list'), data=json.dumps(self.user_data),
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertIn(error_text, str(response.data))
+        self.assertIn(exceptions.EmailAddressAlreadyUsed.description,
+                      str(response.data))
 
     def test_update_user(self):
         response = self.client.put(
@@ -158,14 +159,14 @@ class UserAPITestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_update_user_on_user_name_already_used(self):
-        error_text = 'please use a different username'
         response = self.client.put(
             url_for('api.user_detail', user_id=self.user1.id),
             headers=self.user1_token_auth_headers,
             data=json.dumps({'username': self.user2.username}),
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertIn(error_text, str(response.data))
+        self.assertIn(exceptions.UsernameAlreadyUsed.description,
+                      str(response.data))
         response = self.client.put(
             url_for('api.user_detail', user_id=self.user1.id),
             headers=self.user1_token_auth_headers,
@@ -174,14 +175,14 @@ class UserAPITestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_update_user_on_email_already_used(self):
-        error_text = 'please use a different email address'
         response = self.client.put(
             url_for('api.user_detail', user_id=self.user1.id),
             headers=self.user1_token_auth_headers,
             data=json.dumps({'email': self.user2.email}),
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertIn(error_text, str(response.data))
+        self.assertIn(exceptions.EmailAddressAlreadyUsed.description,
+                      str(response.data))
         response = self.client.put(
             url_for('api.user_detail', user_id=self.user1.id),
             headers=self.user1_token_auth_headers,

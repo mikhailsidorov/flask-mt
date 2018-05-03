@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_restful import Resource
 
-from app.api.auth import token_auth
+from .auth import token_auth
 from app.models import User
 
 
