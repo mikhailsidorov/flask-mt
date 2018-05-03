@@ -2,7 +2,7 @@ from flask import g, jsonify
 from flask_restful import Resource
 
 from app import db
-from app.api.auth import basic_auth, token_auth
+from .auth import basic_auth, token_auth
 
 
 class Token(Resource):

@@ -2,10 +2,11 @@ from flask import jsonify, request, url_for
 from flask_restful import Resource
 
 from app import db
-from app.api.auth import token_auth
-from app.api.errors import bad_request, invalid_post_data
+from .auth import token_auth
+from .permissions import CanDeleteProfile, CanUpdateProfile, allows
 from app.models import User
-from app.authr import allows, CanUpdateProfile, CanDeleteProfile
+
+from .errors import exceptions
 
 
 class UserDetail(Resource):
@@ -25,10 +26,10 @@ class UserDetail(Resource):
         data = request.get_json() or {}
         if 'username' in data and data['username'] != user.username and \
                 User.query.filter_by(username=data['username']).first():
-            return bad_request('please use a different username')
+            raise exceptions.UsernameAlreadyUsed
         if 'email' in data and data['email'] != user.email and \
                 User.query.filter_by(email=data['email']).first():
-            return bad_request('please use a different email address')
+            raise exceptions.EmailAddressAlreadyUsed
         user.from_dict(data, new_user=False)
         db.session.commit()
         return jsonify(user.to_dict())
@@ -37,7 +38,7 @@ class UserDetail(Resource):
         user = User.query.get_or_404(user_id)
         db.session.delete(user)
         db.session.commit()
-        return ('', 200)
+        return '', 200
 
 
 class UserList(Resource):
@@ -55,11 +56,11 @@ class UserList(Resource):
     def post(self):
         data = request.get_json() or {}
         if not is_valid_data(data):
-            return invalid_post_data()
+            raise exceptions.UserRequiredFiesldsIsMissing
         if User.query.filter_by(username=data['username']).first():
-            return bad_request('please use a different username')
+            raise exceptions.UsernameAlreadyUsed
         if User.query.filter_by(email=data['email']).first():
-            return bad_request('please use a different email address')
+            raise exceptions.EmailAddressAlreadyUsed
         user = User()
         user.from_dict(data, new_user=True)
         db.session.add(user)

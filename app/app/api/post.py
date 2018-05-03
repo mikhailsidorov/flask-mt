@@ -2,10 +2,10 @@ from flask import jsonify, request, url_for
 from flask_restful import Resource
 
 from app import db
-from app.api.auth import token_auth
-from app.api.errors import bad_request
-from app.authr import CanCreatePost, allows
+from .auth import token_auth
+from .permissions import CanCreatePost, allows
 from app.models import Post, User
+from .errors.exceptions import PostRequiredFieldsIsMissing
 
 
 class PostDetail(Resource):
@@ -36,7 +36,7 @@ class PostList(Resource):
         user = User.query.get_or_404(user_id)
         data = request.get_json() or {}
         if 'body' not in data or 'user_id' not in data:
-            return bad_request('must include post_body field')
+            raise PostRequiredFieldsIsMissing
         post = Post()
         post.from_dict(data)
         db.session.add(post)

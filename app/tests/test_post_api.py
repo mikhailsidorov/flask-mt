@@ -6,6 +6,7 @@ from flask_restful import url_for
 from app import create_app, db
 from app.models import User, Post
 from config import Config
+from app.api.errors import exceptions
 
 
 class PostAPITestCase(unittest.TestCase):
@@ -100,14 +101,16 @@ class PostAPITestCase(unittest.TestCase):
             headers=self.user1_token_auth_headers,
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertIn('must include user_id field', str(response.data))
+        self.assertIn(exceptions.UserIdFieldIsMissing.description,
+                      str(response.data))
         response = self.client.post(
             url_for('api.post_list', user_id=self.user1.id),
             data=json.dumps({'user_id': self.user1.id}),
             headers=self.user1_token_auth_headers,
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertIn('must include post_body field', str(response.data))
+        self.assertIn(exceptions.PostRequiredFieldsIsMissing.description,
+                      str(response.data))
 
     def test_create_user_post_error_on_not_own_post_creation(self):
         response = self.client.post(
