@@ -50,3 +50,5 @@ rpdb
 flask-cors
 flask-allows==0.4
 Flask-RESTful==0.3.6
+flask-marshmallow==0.9.0
+marshmallow-sqlalchemy

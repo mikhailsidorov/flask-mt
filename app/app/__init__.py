@@ -10,6 +10,7 @@ from flask_babel import Babel, lazy_gettext as _l
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
@@ -18,6 +19,7 @@ from flask_cors import CORS
 from config import Config
 
 db = SQLAlchemy()
+ma = Marshmallow()
 migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
@@ -39,6 +41,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
+    ma.init_app(app)
     mail.init_app(app)
     bootstrap.init_app(app)
     moment.init_app(app)
