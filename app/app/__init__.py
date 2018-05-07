@@ -18,6 +18,7 @@ from flask_cors import CORS
 
 from config import Config
 
+
 db = SQLAlchemy()
 ma = Marshmallow()
 migrate = Migrate()
