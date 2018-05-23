@@ -11,7 +11,9 @@
 * Docker-compose https://docs.docker.com/compose/install/
 
 ### Running
-
-`$ cp .env-template .env`
-
-`$ docker-compose up`
+```
+git clone https://github.com/mikhailsidorov/flask-mt
+cd flask-mt
+cp .env-template .env
+docker-compose up
+```
