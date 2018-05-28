@@ -6,9 +6,9 @@
 
 ### Requirements
 
-* Docker https://docs.docker.com/install/
+* [Docker](https://docs.docker.com/install/)
 
-* Docker-compose https://docs.docker.com/compose/install/
+* [Docker compose](https://docs.docker.com/compose/install/)
 
 ### Running
 ```
