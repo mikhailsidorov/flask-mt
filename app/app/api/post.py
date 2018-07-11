@@ -3,7 +3,7 @@ from flask_restful import Resource
 
 from app import db
 from .auth import token_auth
-from .permissions import CanCreatePost, allows
+from .permissions import CanCreatePost, CanUpdatePost, CanDeletePost, allows
 from app.models import Post, User
 from .errors.exceptions import PostRequiredFieldsIsMissing
 
@@ -11,10 +11,29 @@ from .errors.exceptions import PostRequiredFieldsIsMissing
 class PostDetail(Resource):
     method_decorators = {
         'get': [token_auth.login_required],
+        'put': [allows.requires(CanUpdatePost()), token_auth.login_required],
+        'delete': [allows.requires(CanDeletePost()), token_auth.login_required]
     }
 
     def get(self, user_id, post_id):
         return jsonify(Post.query.get_or_404(post_id).to_dict())
+
+    def put(self, user_id, post_id):
+        post = Post.query.get_or_404(post_id)
+        data = request.get_json() or {}
+        if 'body' not in data or data['body'] == '':
+            raise PostRequiredFieldsIsMissing
+        post.from_dict(data)
+        db.session.commit()
+        response = jsonify(post.to_dict())
+        response.status_code = 204
+        return response
+
+    def delete(self, user_id, post_id):
+        post = Post.query.get_or_404(post_id)
+        db.session.delete(post)
+        db.session.commit()
+        return '', 200
 
 
 class PostList(Resource):
