@@ -1,4 +1,5 @@
 import json
+from pprint import pprint
 import unittest
 
 from flask_restful import url_for
@@ -28,18 +29,20 @@ class PostAPITestCase(unittest.TestCase):
         db.session.commit()
         self.user1_token_auth_headers = {
             'Authorization': 'Bearer ' + self.user1_token}
-        self.post_data1 = {'body': 'Test message',
-                           'user_id': self.user1.id,
+        self.post_data1 = {'body': 'Test message', 'user_id': self.user1.id,
                            'language': 'en-EN'}
-        self.post_data2 = {'body': 'Test message',
-                           'user_id': self.user2.id,
+        self.post_data2 = {'body': 'Test message', 'user_id': self.user2.id,
                            'language': 'en-EN'}
-        self.post1 = Post(body='user1 test post 1',
-                          author=self.user1,
+        self.updated_post1_data = {'body': 'Updated message',
+                                   'user_id': self.user1.id,
+                                   'language': 'en-EN'}
+        self.post1 = Post(body='user1 test post 1', author=self.user1,
                           language='en')
-        self.post2 = Post(body='user1 test post 2',
-                          author=self.user1,
+
+        self.post2 = Post(body='user1 test post 2', author=self.user1,
                           language='en')
+        self.post1_user2 = Post(body='user2 test post', author=self.user2,
+                                language='en')
         db.session.add_all([self.post1, self.post2])
         db.session.commit()
 
@@ -175,3 +178,65 @@ class PostAPITestCase(unittest.TestCase):
                     post_id=self.post1.id),
             headers=self.user1_token_auth_headers)
         self.assertEqual(response.status_code, 200)
+
+    def test_update_post(self):
+        response = self.client.put(
+            url_for('api.post_detail', user_id=self.user1.id,
+                    post_id=self.post1.id),
+            data=json.dumps(self.updated_post1_data),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 204)
+
+    def test_update_post_error_on_not_equal_user_id_in_post_data(self):
+        post_data = self.updated_post1_data.copy()
+        post_data['user_id'] = self.user2.id
+        response = self.client.put(
+            url_for('api.post_detail', user_id=self.user1.id,
+                    post_id=self.post1.id),
+            data=json.dumps(post_data),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+
+    def test_update_post_error_on_post_does_not_exists(self):
+        response = self.client.put(
+            url_for('api.post_detail', user_id=self.user1.id,
+                    post_id=1000),
+            data=json.dumps(self.post_data1),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 404)
+
+    def test_update_post_token_auth_required(self):
+        response = self.client.put(
+            url_for('api.post_detail', user_id=self.user1.id,
+                    post_id=self.post1.id),
+            data=json.dumps(self.post_data1),
+            content_type='application/json')
+        self.assertEqual(response.status_code, 401)
+
+    def test_update_post_error_on_user_does_not_exists(self):
+        """Works same as in case token auth required and updating
+        not own post.
+        """
+
+    def test_update_post_error_on_empty_data_request(self):
+        post_data = self.updated_post1_data.copy()
+        post_data.pop('body')
+        response = self.client.put(
+            url_for('api.post_detail', user_id=self.user1.id,
+                    post_id=self.post1.id),
+            data=json.dumps(post_data),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+
+    def test_update_post_error_on_update_not_own_post(self):
+        response = self.client.put(
+            url_for('api.post_detail', user_id=self.user2.id,
+                    post_id=self.post1_user2.id),
+            data=json.dumps(self.post_data2),
+            headers=self.user1_token_auth_headers,
+            content_type='application/json')
+        self.assertEqual(response.status_code, 403)
