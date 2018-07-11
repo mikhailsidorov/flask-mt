@@ -20,7 +20,7 @@ from config import Config
 
 
 db = SQLAlchemy()
-ma = Marshmallow()
+marshmallow = Marshmallow()
 migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
@@ -42,7 +42,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    ma.init_app(app)
+    marshmallow.init_app(app)
     mail.init_app(app)
     bootstrap.init_app(app)
     moment.init_app(app)
@@ -50,7 +50,8 @@ def create_app(config_class=Config):
     app.redis = Redis.from_url(app.config['REDIS_URL'])
 
     if app.config.get('TASK_DEBUG'):
-        app.task_queue = rq.Queue('microblog-tasks', connection=app.redis, default_timeout=600)
+        app.task_queue = rq.Queue(
+            'microblog-tasks', connection=app.redis, default_timeout=600)
     else:
         app.task_queue = rq.Queue('microblog-tasks', connection=app.redis)
 
@@ -92,7 +93,8 @@ def create_app(config_class=Config):
         else:
             if not os.path.exists('logs'):
                 os.mkdir('logs')
-            file_handler = RotatingFileHandler('logs/microblog.log', maxBytes=10240, backupCount=10)
+            file_handler = RotatingFileHandler(
+                'logs/microblog.log', maxBytes=10240, backupCount=10)
             file_handler.setFormatter(logging.Formatter(
                 '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
             file_handler.setLevel(logging.INFO)

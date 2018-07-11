@@ -6,9 +6,12 @@ from .auth import token_auth
 from .permissions import CanCreatePost, CanUpdatePost, CanDeletePost, allows
 from app.models import Post, User
 from .errors.exceptions import PostRequiredFieldsIsMissing
+from .schemas import PostSchema
 
 
 class PostDetail(Resource):
+    post_schema = PostSchema()
+
     method_decorators = {
         'get': [token_auth.login_required],
         'put': [allows.requires(CanUpdatePost()), token_auth.login_required],
@@ -16,7 +19,8 @@ class PostDetail(Resource):
     }
 
     def get(self, user_id, post_id):
-        return jsonify(Post.query.get_or_404(post_id).to_dict())
+        post = Post.query.get_or_404(post_id)
+        return self.post_schema.jsonify(post)
 
     def put(self, user_id, post_id):
         post = Post.query.get_or_404(post_id)
@@ -25,7 +29,7 @@ class PostDetail(Resource):
             raise PostRequiredFieldsIsMissing
         post.from_dict(data)
         db.session.commit()
-        response = jsonify(post.to_dict())
+        response = self.post_schema.jsonify(post)
         response.status_code = 204
         return response
 
