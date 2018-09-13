@@ -56,7 +56,7 @@ class UserList(Resource):
     def post(self):
         data = request.get_json() or {}
         if not is_valid_data(data):
-            raise exceptions.UserRequiredFiesldsIsMissing
+            raise exceptions.UserRequiredFieldsIsMissed
         if User.query.filter_by(username=data['username']).first():
             raise exceptions.UsernameAlreadyUsed
         if User.query.filter_by(email=data['email']).first():
