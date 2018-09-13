@@ -104,7 +104,7 @@ class PostAPITestCase(unittest.TestCase):
             headers=self.user1_token_auth_headers,
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertIn(exceptions.UserIdFieldIsMissing.description,
+        self.assertIn(exceptions.UserIdFieldIsMissed.description,
                       str(response.data))
         response = self.client.post(
             url_for('api.post_list', user_id=self.user1.id),
@@ -112,7 +112,7 @@ class PostAPITestCase(unittest.TestCase):
             headers=self.user1_token_auth_headers,
             content_type='application/json')
         self.assertEqual(response.status_code, 400)
-        self.assertIn(exceptions.PostRequiredFieldsIsMissing.description,
+        self.assertIn(exceptions.PostRequiredFieldsIsMissed.description,
                       str(response.data))
 
     def test_create_user_post_error_on_not_own_post_creation(self):
