@@ -28,8 +28,8 @@ api.add_resource(FollowedDetail,
                  '/users/<int:user_id>/followed/<int:followed_id>',
                  endpoint='followed_detail')
 
-bp.register_error_handler(exceptions.PostRequiredFieldsMissed, error_response)
+bp.register_error_handler(exceptions.PostRequiredFieldsIsMissed, error_response)
 bp.register_error_handler(exceptions.UsernameAlreadyUsed, error_response)
 bp.register_error_handler(exceptions.EmailAddressAlreadyUsed, error_response)
-bp.register_error_handler(exceptions.UserRequiredFiesldsMissed, error_response)
+bp.register_error_handler(exceptions.UserRequiredFieldsIsMissed, error_response)
 bp.register_error_handler(exceptions.UserIdFieldIsMissing, error_response)
