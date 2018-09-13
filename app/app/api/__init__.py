@@ -4,7 +4,6 @@ from flask_restful import Api
 bp = Blueprint('api', __name__)
 api = Api(bp)
 
-# from . import users, errors, tokens
 
 from .follower import FollowedDetail, FollowedList, FollowerList
 from .post import PostDetail, PostList
