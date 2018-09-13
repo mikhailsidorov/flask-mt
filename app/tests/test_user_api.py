@@ -108,7 +108,7 @@ class UserAPITestCase(unittest.TestCase):
                 url_for('api.user_list'), data=json.dumps(user_data),
                 content_type='application/json')
             self.assertEqual(response.status_code, 400)
-            self.assertIn(exceptions.UserRequiredFiesldsIsMissing.description,
+            self.assertIn(exceptions.UserRequiredFieldsIsMissed.description,
                           str(response.data))
 
     def test_create_user_error_on_username_already_used(self):
