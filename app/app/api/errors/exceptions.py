@@ -1,11 +1,11 @@
 from werkzeug.exceptions import BadRequest
 
 
-class PostRequiredFieldsIsMissing(BadRequest):
+class PostRequiredFieldsIsMissed(BadRequest):
     description = 'must include post_body and user_id fields'
 
 
-class UserIdFieldIsMissing(BadRequest):
+class UserIdFieldIsMissed(BadRequest):
     description = 'must include user_id field'
 
 
@@ -17,5 +17,5 @@ class EmailAddressAlreadyUsed(BadRequest):
     description = 'please use a different email address'
 
 
-class UserRequiredFiesldsIsMissing(BadRequest):
+class UserRequiredFieldsIsMissed(BadRequest):
     description = 'must include username, email and password fields'
