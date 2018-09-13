@@ -10,6 +10,8 @@ from .follower import FollowedDetail, FollowedList, FollowerList
 from .post import PostDetail, PostList
 from .token import Token
 from .user import UserDetail, UserList
+from .errors import exceptions
+from .errors.handlers import error_response
 
 
 api.add_resource(UserDetail, '/users/<int:user_id>', endpoint='user_detail')
@@ -25,3 +27,9 @@ api.add_resource(FollowedList, '/users/<int:user_id>/followed',
 api.add_resource(FollowedDetail,
                  '/users/<int:user_id>/followed/<int:followed_id>',
                  endpoint='followed_detail')
+
+bp.register_error_handler(exceptions.PostRequiredFieldsMissed, error_response)
+bp.register_error_handler(exceptions.UsernameAlreadyUsed, error_response)
+bp.register_error_handler(exceptions.EmailAddressAlreadyUsed, error_response)
+bp.register_error_handler(exceptions.UserRequiredFiesldsMissed, error_response)
+bp.register_error_handler(exceptions.UserIdFieldIsMissing, error_response)
