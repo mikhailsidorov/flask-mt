@@ -5,7 +5,7 @@ from app import db
 from .auth import token_auth
 from .permissions import CanCreatePost, CanUpdatePost, CanDeletePost, allows
 from app.models import Post, User
-from .errors.exceptions import PostRequiredFieldsIsMissing
+from .errors.exceptions import PostRequiredFieldsIsMissed
 from .schemas import PostSchema
 
 
@@ -26,7 +26,7 @@ class PostDetail(Resource):
         post = Post.query.get_or_404(post_id)
         data = request.get_json() or {}
         if 'body' not in data or data['body'] == '':
-            raise PostRequiredFieldsIsMissing
+            raise PostRequiredFieldsIsMissed
         post.from_dict(data)
         db.session.commit()
         response = self.post_schema.jsonify(post)
@@ -59,7 +59,7 @@ class PostList(Resource):
         user = User.query.get_or_404(user_id)
         data = request.get_json() or {}
         if 'body' not in data or 'user_id' not in data:
-            raise PostRequiredFieldsIsMissing
+            raise PostRequiredFieldsIsMissed
         post = Post()
         post.from_dict(data)
         db.session.add(post)

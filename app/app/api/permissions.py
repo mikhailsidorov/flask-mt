@@ -1,7 +1,7 @@
 from flask_allows import Allows, Requirement
 from flask import g
 
-from .errors.exceptions import UserIdFieldIsMissing
+from .errors.exceptions import UserIdFieldIsMissed
 
 
 allows = Allows(identity_loader=lambda: g.current_user)
@@ -31,7 +31,7 @@ class CanCreatePost(UserRequirementMixin, Requirement):
     def is_owner_id_in_data(self, identity, request):
         data = request.get_json() or {}
         if 'user_id' not in data:
-            raise UserIdFieldIsMissing
+            raise UserIdFieldIsMissed
         return identity.id == data['user_id']
 
 
