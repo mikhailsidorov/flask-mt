@@ -19,7 +19,7 @@ if app.config['TASK_DEBUG']:
     debug = rpdb.Rpdb(addr="0.0.0.0", port=4445)
 
 
-def _set_tast_progress(progress):
+def _set_task_progress(progress):
     job = get_current_job()
     if job:
         job.meta['progress'] = progress
@@ -37,14 +37,14 @@ def export_posts(user_id):
         user = User.query.get(user_id)
         total_posts = user.posts.count()
         if total_posts > 0:
-            _set_tast_progress(0)
+            _set_task_progress(0)
             data = []
             i = 0
             for post in user.posts.order_by(Post.timestamp.asc()):
                 data.append({'body': post.body, 'timestamp': post.timestamp.isoformat() + 'Z'})
                 time.sleep(5)
                 i += 1
-                _set_tast_progress(100 * i // total_posts)
+                _set_task_progress(100 * i // total_posts)
             send_email('[Microblog] Your blog posts',
                        sender=app.config['ADMINS'][0], recipients=[user.email],
                        text_body=render_template('email/export_posts.txt', user=user),
@@ -52,7 +52,7 @@ def export_posts(user_id):
                        attachements=[('posts.json', 'application/json', json.dumps({'posts': data}, indent=4))],
                        sync=True)
         else:
-            _set_tast_progress(100)
+            _set_task_progress(100)
     except:
-        _set_tast_progress(100)
+        _set_task_progress(100)
         app.logger.error('Unhandled exception', exc_info=sys.exc_info())
