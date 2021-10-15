@@ -2,14 +2,17 @@
 
 set -e
 
-host="$1"
-shift
-cmd="$@"
+db_uri="$1"
 
-until psql -h "$host" -U "postgres" -c '\q'; do
-  >&2 echo "Postgres is unavailable - sleeping"
+echo "$db_uri"
+
+shift
+cmd="$*"
+
+until psql "${db_uri}" -c '\q'; do
+  echo >&2 "Postgres is unavailable - sleeping"
   sleep 1
 done
 
->&2 echo "Postgres is up - executing command"
+echo >&2 "Postgres is up - executing command"
 exec $cmd
