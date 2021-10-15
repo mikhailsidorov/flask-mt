@@ -7,6 +7,7 @@ services:
     build: ./app/
     ports:
       - "4444:4444"
+      - "8000:8000"
     expose:
       - "8000"
     links:
@@ -21,7 +22,7 @@ services:
     volumes:
       - ./app:/data/app
     working_dir: /data/app
-    command: ["sh", "./wait-for-postgres.sh", "postgres", "gunicorn", "microblog:app", "-w", "2", "-b", ":8000"]
+    command: ["sh", "./wait-for-postgres.sh", "postgres://${DB_USER}:${DB_PASS}@${DB_SERVICE}:5432/${DB_NAME}", "gunicorn", "microblog:app", "-w", "2", "-b", ":8000"]
     depends_on:
       - app-migration
       - app-translation
@@ -118,7 +119,7 @@ services:
   postgres:
     container_name: "postgres"
     restart: always
-    image: postgres:9
+    image: postgres:9.6
     volumes:
       - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
       - db:/var/lib/postgresql
