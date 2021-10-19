@@ -1,14 +1,16 @@
-FROM alpine:3.14.2
+FROM python:3.7
 
 RUN mkdir -p /data/app
 WORKDIR /data/app
-COPY requirements /data/app/requirements
+COPY pyproject.toml /data/app/pyproject.toml
 
-RUN apk update
-RUN apk upgrade
-RUN apk add --update python3 python3-dev py3-pip postgresql-client postgresql-dev build-base gettext
+RUN apt update
+RUN apt upgrade 
+RUN apt install -y vim postgresql-client gettext
 RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements/prod.txt
-# && apk del -r python3-dev postgresql
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 -
+ENV PATH="/root/.local/bin:$PATH"
+RUN poetry config virtualenvs.create false
+RUN poetry install
 
 COPY . /data/app/
